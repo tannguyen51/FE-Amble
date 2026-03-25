@@ -1,5 +1,6 @@
-import { restaurantApi } from "./restaurantApi";
+import { API_BASE_URL } from "@/constants/apiConfig";
 import { bookingAPI } from "./api";
+import { restaurantApi } from "./restaurantApi";
 
 export type BookingStep =
   | "idle"
@@ -71,15 +72,12 @@ export const DEFAULT_SESSION: AISession = {
 
 // ─── Gọi Gemini qua BE proxy (key bảo mật trong BE/.env) ───────────────────
 
-const BE_URL = "http://10.0.2.2:5000/api"; // Android emulator
-// const BE_URL = 'http://localhost:5000/api'; // iOS simulator
-
 async function callClaude(
   systemPrompt: string,
   history: { role: "user" | "assistant"; content: string }[],
   userMessage: string,
 ): Promise<string> {
-  const res = await fetch(`${BE_URL}/ai/chat`, {
+  const res = await fetch(`${API_BASE_URL}/ai/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

@@ -1,4 +1,4 @@
-const BASE_URL = "http://10.0.2.2:5000/api"; // Android emulator
+import { API_BASE_URL } from "@/constants/apiConfig";
 
 export const restaurantApi = {
   async searchRestaurants(params: {
@@ -10,7 +10,7 @@ export const restaurantApi = {
   }) {
     const query = new URLSearchParams(params as any).toString();
 
-    const res = await fetch(`${BASE_URL}/restaurants?${query}`);
+    const res = await fetch(`${API_BASE_URL}/restaurants?${query}`);
 
     const data = await res.json();
 
@@ -22,7 +22,7 @@ export const restaurantApi = {
   },
 
   async getFeaturedRestaurants() {
-    const res = await fetch(`${BASE_URL}/restaurants/featured`);
+    const res = await fetch(`${API_BASE_URL}/restaurants/featured`);
 
     const data = await res.json();
 

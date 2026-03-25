@@ -53,6 +53,14 @@ Join our community of developers creating universal apps.
 
 This project is already configured for static web export using Expo Router.
 
+Before deploying, set API URL so web does not call emulator localhost:
+
+```bash
+EXPO_PUBLIC_API_URL=https://your-backend-domain.com/api
+```
+
+For Vercel, add environment variable `EXPO_PUBLIC_API_URL` in Project Settings -> Environment Variables.
+
 1. Install dependencies
 
    ```bash

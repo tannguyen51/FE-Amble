@@ -3,5 +3,8 @@
   "buildCommand": "npx expo export -p web",
   "outputDirectory": "dist",
   "framework": null,
+  "env": {
+    "EXPO_PUBLIC_API_URL": "https://be-amble-2.onrender.com"
+  },
   "cleanUrls": true
 }
