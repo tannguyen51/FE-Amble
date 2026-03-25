@@ -9,6 +9,9 @@ function getFallbackBaseUrl() {
   if (Platform.OS === "android") {
     return "http://10.0.2.2:5000/api";
   }
+  if (Platform.OS === "web") {
+    return "https://be-amble-2.onrender.com/api";
+  }
   return "http://localhost:5000/api";
 }
 

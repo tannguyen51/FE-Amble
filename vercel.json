@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npx expo export -p web",
+  "buildCommand": "EXPO_PUBLIC_API_URL=https://be-amble-2.onrender.com npx expo export -p web",
   "outputDirectory": "dist",
   "framework": null,
   "env": {
