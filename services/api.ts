@@ -262,4 +262,7 @@ export const routesAPI = {
   getById: (id: string) => api.get(`/routes/${id}`),
 };
 
+export const extractPayload = <T = any>(response: any): T =>
+  (response?.data?.data ?? response?.data ?? {}) as T;
+
 export default api;
