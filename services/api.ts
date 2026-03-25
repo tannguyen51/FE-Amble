@@ -1,12 +1,15 @@
-import { API_BASE_URL } from "@/constants/apiConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
+const BASE_URL = "https://be-amble-2.onrender.com/api";
+
 const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 10000,
+  baseURL: BASE_URL,
+  timeout: 30000,
   headers: { "Content-Type": "application/json" },
 });
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 api.interceptors.request.use(async (config) => {
   const userToken = await AsyncStorage.getItem("amble_token");
@@ -17,6 +20,31 @@ api.interceptors.request.use(async (config) => {
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
+
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const config = error.config;
+
+    // Retry once for transient startup failures (Render cold start, flaky network).
+    if (config && !config.__isRetryRequest) {
+      const method = (config.method || "").toLowerCase();
+      const status = error.response?.status;
+      const isNetworkError = !error.response;
+      const isRetryableServerError =
+        typeof status === "number" && status >= 500;
+      const isSafeToRetry = method === "get" || method === "head";
+
+      if (isSafeToRetry && (isNetworkError || isRetryableServerError)) {
+        config.__isRetryRequest = true;
+        await sleep(1200);
+        return api(config);
+      }
+    }
+
+    return Promise.reject(error);
+  },
+);
 
 // ── Auth ────────────────────────────────────────────────
 export const authAPI = {
@@ -261,8 +289,5 @@ export const routesAPI = {
   getPopular: () => api.get("/routes/popular"),
   getById: (id: string) => api.get(`/routes/${id}`),
 };
-
-export const extractPayload = <T = any>(response: any): T =>
-  (response?.data?.data ?? response?.data ?? {}) as T;
 
 export default api;

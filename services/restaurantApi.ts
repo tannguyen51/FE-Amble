@@ -1,4 +1,4 @@
-import { API_BASE_URL } from "@/constants/apiConfig";
+const BASE_URL = "https://be-amble-2.onrender.com/api";
 
 export const restaurantApi = {
   async searchRestaurants(params: {
@@ -10,7 +10,7 @@ export const restaurantApi = {
   }) {
     const query = new URLSearchParams(params as any).toString();
 
-    const res = await fetch(`${API_BASE_URL}/restaurants?${query}`);
+    const res = await fetch(`${BASE_URL}/restaurants?${query}`);
 
     const data = await res.json();
 
@@ -22,7 +22,7 @@ export const restaurantApi = {
   },
 
   async getFeaturedRestaurants() {
-    const res = await fetch(`${API_BASE_URL}/restaurants/featured`);
+    const res = await fetch(`${BASE_URL}/restaurants/featured`);
 
     const data = await res.json();
 

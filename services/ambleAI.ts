@@ -1,4 +1,3 @@
-import { API_BASE_URL } from "@/constants/apiConfig";
 import { bookingAPI } from "./api";
 import { restaurantApi } from "./restaurantApi";
 
@@ -72,12 +71,14 @@ export const DEFAULT_SESSION: AISession = {
 
 // ─── Gọi Gemini qua BE proxy (key bảo mật trong BE/.env) ───────────────────
 
+const BE_URL = "https://be-amble-2.onrender.com/api";
+
 async function callClaude(
   systemPrompt: string,
   history: { role: "user" | "assistant"; content: string }[],
   userMessage: string,
 ): Promise<string> {
-  const res = await fetch(`${API_BASE_URL}/ai/chat`, {
+  const res = await fetch(`${BE_URL}/ai/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Image,
-  SafeAreaView,
-  ActivityIndicator,
-  TextInput,
-  Alert,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { bookingAPI } from "@/services/api";
 import { useAuthStore } from "@/store/authStore";
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const PRIMARY = "#FF6B35";
 
@@ -52,7 +52,7 @@ const TABLE_TYPE_LABELS: Record<string, string> = {
 
 export default function ConfirmBookingScreen() {
   const router = useRouter();
-  const { user } = useAuthStore();
+  const { user, loadUser } = useAuthStore();
   const {
     restaurantId,
     restaurantName,
@@ -158,14 +158,23 @@ export default function ConfirmBookingScreen() {
   };
 
   const handleConfirm = async () => {
-    if (!user?._id) {
-      Alert.alert("Lỗi", "Vui lòng đăng nhập để đặt bàn");
-      return;
-    }
     setLoading(true);
     try {
+      let bookingUserId = user?._id;
+
+      // Recover when app has token but user profile is not in memory yet.
+      if (!bookingUserId) {
+        await loadUser();
+        bookingUserId = useAuthStore.getState().user?._id;
+      }
+
+      if (!bookingUserId) {
+        Alert.alert("Lỗi", "Vui lòng đăng nhập để đặt bàn");
+        return;
+      }
+
       const res = await bookingAPI.create({
-        userId: user._id,
+        userId: bookingUserId,
         restaurantId: restaurantId as string,
         tableId: tableId as string,
         date: bookingData.date,
@@ -192,9 +201,15 @@ export default function ConfirmBookingScreen() {
         },
       });
     } catch (err: any) {
+      const networkMessage =
+        "Không kết nối được BE local. Hãy kiểm tra server BE đang chạy và URL API đúng với thiết bị test.";
+
       Alert.alert(
         "Lỗi",
-        err.response?.data?.message || "Đặt bàn thất bại. Vui lòng thử lại.",
+        err.response?.data?.message ||
+          (err.request && !err.response
+            ? networkMessage
+            : "Đặt bàn thất bại. Vui lòng thử lại."),
       );
     } finally {
       setLoading(false);
