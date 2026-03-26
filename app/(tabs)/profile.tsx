@@ -191,24 +191,28 @@ export default function ProfileScreen() {
 
   const fetchProfileStats = useCallback(async () => {
     if (!user?._id) return;
-    try {
-      const [bookingsRes, favoritesRes, rewardsRes] = await Promise.all([
-        bookingAPI.getUserBookings(user._id),
-        userAPI.getFavoriteRestaurants(),
-        userAPI.getRewards(),
-      ]);
+    const [bookingsRes, favoritesRes, rewardsRes] = await Promise.allSettled([
+      bookingAPI.getUserBookings(user._id),
+      userAPI.getFavoriteRestaurants(),
+      userAPI.getRewards(),
+    ]);
 
-      const done = (bookingsRes.data?.bookings || []).filter((b: any) =>
+    if (bookingsRes.status === "fulfilled") {
+      const done = (bookingsRes.value.data?.bookings || []).filter((b: any) =>
         ["confirmed", "paid", "completed"].includes(b.status),
       ).length;
       setBookingCount(done);
+    }
 
-      const favorites = Array.isArray(favoritesRes.data?.favorites)
-        ? favoritesRes.data.favorites
+    if (favoritesRes.status === "fulfilled") {
+      const favorites = Array.isArray(favoritesRes.value.data?.favorites)
+        ? favoritesRes.value.data.favorites
         : [];
       setFavoriteRestaurants(favorites);
+    }
 
-      const data = rewardsRes.data || {};
+    if (rewardsRes.status === "fulfilled") {
+      const data = rewardsRes.value.data || {};
       setRewardPoints(Number(data.points ?? 0));
       setRewardTier(
         String(data.currentTier?.label || data.currentTier?.id || "Silver"),
@@ -216,8 +220,6 @@ export default function ProfileScreen() {
       setRewardNextTier(String(data.nextTier?.label || "MAX"));
       setRewardNeeded(Number(data.neededToNextTier ?? 0));
       setRewardProgress(Math.max(0, Math.min(100, Number(data.progress ?? 0))));
-    } catch {
-      // Keep last known values when a request fails.
     }
   }, [user?._id]);
 
