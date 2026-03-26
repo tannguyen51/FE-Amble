@@ -1,22 +1,23 @@
+import { Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from "expo-image-picker";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
-  ActivityIndicator,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    Platform,
+    SafeAreaView,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import * as ImagePicker from "expo-image-picker";
-import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { usePartnerAuthStore } from "../../store/partnerAuthStore";
 import { PartnerBottomNav } from "../../components/partner/PartnerBottomNav";
 import { partnerDashboardAPI } from "../../services/api";
+import { usePartnerAuthStore } from "../../store/partnerAuthStore";
 
 type OpenDay = "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun";
 
@@ -190,15 +191,32 @@ export default function PartnerProfileScreen() {
     }
   };
 
+  const executeLogout = async () => {
+    await logout();
+    router.replace("/welcome");
+  };
+
   const handleLogout = () => {
-    Alert.alert("Đăng xuất", "Bạn muốn đăng xuất tài khoản đối tác?", [
+    const message = "Bạn muốn đăng xuất tài khoản đối tác?";
+
+    if (Platform.OS === "web") {
+      const isConfirmed =
+        typeof globalThis.confirm === "function"
+          ? globalThis.confirm(message)
+          : true;
+      if (isConfirmed) {
+        void executeLogout();
+      }
+      return;
+    }
+
+    Alert.alert("Đăng xuất", message, [
       { text: "Hủy", style: "cancel" },
       {
         text: "Đăng xuất",
         style: "destructive",
-        onPress: async () => {
-          await logout();
-          router.replace("/welcome");
+        onPress: () => {
+          void executeLogout();
         },
       },
     ]);
