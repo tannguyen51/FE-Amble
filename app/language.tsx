@@ -3,14 +3,14 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-    Animated,
-    Easing,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Easing,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import AmbleLogo from "../components/AmbleLogo";
 import { AppLanguage, useLanguageStore } from "../store/languageStore";
@@ -84,7 +84,7 @@ const COPY = {
   },
   other: {
     title: "Select your language / Chọn ngôn ngữ",
-    continue: "Continue",
+    continue: "Tiếp tục",
   },
 } as const;
 
@@ -325,6 +325,9 @@ export default function LanguageScreen() {
           })}
         </View>
 
+      </ScrollView>
+
+      <View style={styles.footerWrap}>
         <TouchableOpacity
           style={[
             styles.continueBtn,
@@ -336,7 +339,7 @@ export default function LanguageScreen() {
         >
           <Text style={styles.continueText}>{copy.continue}</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -376,10 +379,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentWrap: {
-    flexGrow: 1,
     paddingTop: 80,
     paddingHorizontal: 22,
-    paddingBottom: 32,
+    paddingBottom: 120,
   },
   headerWrap: {
     alignItems: "center",
@@ -452,8 +454,13 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
   },
+  footerWrap: {
+    position: "absolute",
+    left: 22,
+    right: 22,
+    bottom: 24,
+  },
   continueBtn: {
-    marginTop: "auto",
     borderRadius: 14,
     backgroundColor: "#fff1de",
     height: 56,
