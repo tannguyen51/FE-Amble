@@ -1,22 +1,22 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { Link, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  View,
+  ActivityIndicator,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Alert,
-  ActivityIndicator,
+  View,
 } from "react-native";
-import { Link, useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
+import AmbleLogo from "../../components/AmbleLogo";
 import { partnerAuthAPI } from "../../services/api";
 import { AppLanguage, useLanguageStore } from "../../store/languageStore";
-import AmbleLogo from "../../components/AmbleLogo";
 
 const PARTNER_GRAD: [string, string] = ["#FF6B35", "#FFD700"];
 const DARK_GRAD: [string, string] = ["#1A1A1A", "#333333"];
@@ -363,7 +363,7 @@ const FALLBACK_PACKAGES: PackageItem[] = [
   {
     key: "basic",
     label: "Basic",
-    price: "299.000đ",
+    price: "Free",
     badge: "",
     tone: "#F9FAFB",
     border: "#E5E7EB",
@@ -382,7 +382,7 @@ const FALLBACK_PACKAGES: PackageItem[] = [
   {
     key: "pro",
     label: "Pro",
-    price: "799.000đ",
+    price: "2.999.000đ",
     badge: "Phổ biến",
     tone: "#EFF6FF",
     border: "#93C5FD",
@@ -402,7 +402,7 @@ const FALLBACK_PACKAGES: PackageItem[] = [
   {
     key: "premium",
     label: "Premium",
-    price: "1.499.000đ",
+    price: "9.999.000đ",
     badge: "Cao cấp",
     tone: "#FAF5FF",
     border: "#C4B5FD",
