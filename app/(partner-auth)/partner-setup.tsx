@@ -1,23 +1,23 @@
-import React, { useMemo, useState } from "react";
-import {
-  Alert,
-  Image,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import * as ImagePicker from "expo-image-picker";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useMemo, useState } from "react";
+import {
+    Alert,
+    Image,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import AmbleLogo from "../../components/AmbleLogo";
 import { partnerDashboardAPI } from "../../services/api";
 import { usePartnerAuthStore } from "../../store/partnerAuthStore";
-import AmbleLogo from "../../components/AmbleLogo";
 
 const HEADER_GRAD: [string, string] = ["#FF8A2A", "#FFC11A"];
 const ORANGE = "#FF7A2F";
@@ -777,6 +777,7 @@ function Input({
       ) : null}
       <TextInput
         placeholder={placeholder}
+        placeholderTextColor="#A1A1AA"
         value={value}
         onChangeText={onChangeText}
         multiline={multiline}
