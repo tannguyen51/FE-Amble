@@ -6,7 +6,6 @@ import {
     ActivityIndicator,
     Alert,
     Image,
-    Platform,
     SafeAreaView,
     ScrollView,
     StyleSheet,
@@ -197,29 +196,7 @@ export default function PartnerProfileScreen() {
   };
 
   const handleLogout = () => {
-    const message = "Bạn muốn đăng xuất tài khoản đối tác?";
-
-    if (Platform.OS === "web") {
-      const isConfirmed =
-        typeof globalThis.confirm === "function"
-          ? globalThis.confirm(message)
-          : true;
-      if (isConfirmed) {
-        void executeLogout();
-      }
-      return;
-    }
-
-    Alert.alert("Đăng xuất", message, [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Đăng xuất",
-        style: "destructive",
-        onPress: () => {
-          void executeLogout();
-        },
-      },
-    ]);
+    void executeLogout();
   };
 
   return (
