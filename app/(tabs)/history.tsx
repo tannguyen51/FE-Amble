@@ -5,19 +5,20 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  Image,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    FlatList,
+    Image,
+    Platform,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+    SafeAreaView,
+    useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 const PRIMARY = "#FF6B35";
@@ -92,35 +93,48 @@ export default function BookingHistoryScreen() {
     fetchBookings();
   };
 
+  const executeCancel = async (bookingId: string) => {
+    setCancelling(bookingId);
+    try {
+      await bookingAPI.cancel(bookingId, "Người dùng hủy");
+      // Cập nhật local state
+      setBookings((prev) =>
+        prev.map((b) => (b._id === bookingId ? { ...b, status: "cancelled" } : b)),
+      );
+      Alert.alert("Thành công", "Đã hủy đặt bàn");
+    } catch (err: any) {
+      Alert.alert("Lỗi", err.response?.data?.message || "Hủy thất bại");
+    } finally {
+      setCancelling(null);
+    }
+  };
+
   const handleCancel = (bookingId: string, bookingNumber: string) => {
-    Alert.alert(
-      "Hủy đặt bàn",
-      `Bạn có chắc muốn hủy booking ${bookingNumber}?\nTiền cọc sẽ được hoàn nếu hủy trước 2 giờ.`,
-      [
-        { text: "Không", style: "cancel" },
-        {
-          text: "Hủy đặt bàn",
-          style: "destructive",
-          onPress: async () => {
-            setCancelling(bookingId);
-            try {
-              await bookingAPI.cancel(bookingId, "Người dùng hủy");
-              // Cập nhật local state
-              setBookings((prev) =>
-                prev.map((b) =>
-                  b._id === bookingId ? { ...b, status: "cancelled" } : b,
-                ),
-              );
-              Alert.alert("Thành công", "Đã hủy đặt bàn");
-            } catch (err: any) {
-              Alert.alert("Lỗi", err.response?.data?.message || "Hủy thất bại");
-            } finally {
-              setCancelling(null);
-            }
-          },
+    const confirmMsg =
+      `Bạn có chắc muốn hủy booking ${bookingNumber}?\n` +
+      `Tiền cọc sẽ được hoàn nếu hủy trước 2 giờ.`;
+
+    if (Platform.OS === "web") {
+      const isConfirmed =
+        typeof globalThis.confirm === "function"
+          ? globalThis.confirm(confirmMsg)
+          : true;
+      if (isConfirmed) {
+        void executeCancel(bookingId);
+      }
+      return;
+    }
+
+    Alert.alert("Hủy đặt bàn", confirmMsg, [
+      { text: "Không", style: "cancel" },
+      {
+        text: "Hủy đặt bàn",
+        style: "destructive",
+        onPress: () => {
+          void executeCancel(bookingId);
         },
-      ],
-    );
+      },
+    ]);
   };
 
   const currentTab = TAB_CONFIG.find((t) => t.id === activeTab)!;
