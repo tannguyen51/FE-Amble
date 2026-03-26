@@ -1,3 +1,6 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,13 +15,9 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { useRouter } from "expo-router";
-import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { partnerAuthAPI } from "../../services/api";
-import { partnerDashboardAPI } from "../../services/api";
-import { usePartnerAuthStore } from "../../store/partnerAuthStore";
 import { PartnerBottomNav } from "../../components/partner/PartnerBottomNav";
+import { partnerAuthAPI, partnerDashboardAPI } from "../../services/api";
+import { usePartnerAuthStore } from "../../store/partnerAuthStore";
 
 type PackageFeature = {
   text: string;
@@ -44,8 +43,8 @@ const FALLBACK_PACKAGES: ServicePackage[] = [
     key: "basic",
     label: "Basic",
     badge: "",
-    price: "299.000đ",
-    priceMonthly: 299000,
+    price: "Free",
+    priceMonthly: 0,
     currency: "VND",
     tone: "#F9FAFB",
     border: "#E5E7EB",
@@ -65,8 +64,8 @@ const FALLBACK_PACKAGES: ServicePackage[] = [
     key: "pro",
     label: "Pro",
     badge: "Phổ biến",
-    price: "799.000đ",
-    priceMonthly: 799000,
+    price: "3.999.000đ",
+    priceMonthly: 3999000,
     currency: "VND",
     tone: "#EFF6FF",
     border: "#93C5FD",
@@ -87,8 +86,8 @@ const FALLBACK_PACKAGES: ServicePackage[] = [
     key: "premium",
     label: "Premium",
     badge: "Cao cấp",
-    price: "1.499.000đ",
-    priceMonthly: 1499000,
+    price: "9.999.000đ",
+    priceMonthly: 9999000,
     currency: "VND",
     tone: "#FAF5FF",
     border: "#C4B5FD",
@@ -109,12 +108,31 @@ const FALLBACK_PACKAGES: ServicePackage[] = [
 
 const PACKAGE_ORDER: Array<ServicePackage["key"]> = ["basic", "pro", "premium"];
 
+const PACKAGE_PRICE_OVERRIDES: Record<
+  ServicePackage["key"],
+  { price: string; priceMonthly: number }
+> = {
+  basic: { price: "Free", priceMonthly: 0 },
+  pro: { price: "3.999.000đ", priceMonthly: 3999000 },
+  premium: { price: "9.999.000đ", priceMonthly: 9999000 },
+};
+
+const applyPackagePriceOverrides = (items: ServicePackage[]) =>
+  items.map((item) => ({
+    ...item,
+    price: PACKAGE_PRICE_OVERRIDES[item.key]?.price ?? item.price,
+    priceMonthly:
+      PACKAGE_PRICE_OVERRIDES[item.key]?.priceMonthly ?? item.priceMonthly,
+  }));
+
 export default function PartnerPackagesScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { partner, loadPartner } = usePartnerAuthStore();
 
-  const [packages, setPackages] = useState<ServicePackage[]>(FALLBACK_PACKAGES);
+  const [packages, setPackages] = useState<ServicePackage[]>(
+    applyPackagePriceOverrides(FALLBACK_PACKAGES),
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [updatingKey, setUpdatingKey] = useState<ServicePackage["key"] | null>(
     null,
@@ -131,11 +149,11 @@ export default function PartnerPackagesScreen() {
           Array.isArray(res.data?.packages) &&
           res.data.packages.length > 0
         ) {
-          setPackages(res.data.packages);
+          setPackages(applyPackagePriceOverrides(res.data.packages));
         }
       } catch {
         if (mounted) {
-          setPackages(FALLBACK_PACKAGES);
+          setPackages(applyPackagePriceOverrides(FALLBACK_PACKAGES));
         }
       } finally {
         if (mounted) {
@@ -261,7 +279,7 @@ export default function PartnerPackagesScreen() {
                       <Text
                         style={[styles.packagePrice, { color: item.accent }]}
                       >
-                        {item.price}/tháng
+                        {item.key === "basic" ? item.price : `${item.price}/tháng`}
                       </Text>
                     </View>
                   </View>
