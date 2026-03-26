@@ -1,23 +1,23 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  TextInput,
-  Modal,
-  Alert,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useEffect, useState } from "react";
+import {
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { bookingAPI, userAPI } from "../../services/api";
 import { useAuthStore } from "../../store/authStore";
-import { userAPI, bookingAPI } from "../../services/api";
 
 const PRIMARY = "#FF6B35";
 const GRAD: [string, string] = ["#FF6B35", "#FFD700"];
@@ -189,46 +189,49 @@ export default function ProfileScreen() {
     confirmPassword: "",
   });
 
+  const fetchProfileStats = useCallback(async () => {
+    if (!user?._id) return;
+    try {
+      const [bookingsRes, favoritesRes, rewardsRes] = await Promise.all([
+        bookingAPI.getUserBookings(user._id),
+        userAPI.getFavoriteRestaurants(),
+        userAPI.getRewards(),
+      ]);
+
+      const done = (bookingsRes.data?.bookings || []).filter((b: any) =>
+        ["confirmed", "paid", "completed"].includes(b.status),
+      ).length;
+      setBookingCount(done);
+
+      const favorites = Array.isArray(favoritesRes.data?.favorites)
+        ? favoritesRes.data.favorites
+        : [];
+      setFavoriteRestaurants(favorites);
+
+      const data = rewardsRes.data || {};
+      setRewardPoints(Number(data.points ?? 0));
+      setRewardTier(
+        String(data.currentTier?.label || data.currentTier?.id || "Silver"),
+      );
+      setRewardNextTier(String(data.nextTier?.label || "MAX"));
+      setRewardNeeded(Number(data.neededToNextTier ?? 0));
+      setRewardProgress(Math.max(0, Math.min(100, Number(data.progress ?? 0))));
+    } catch {
+      // Keep last known values when a request fails.
+    }
+  }, [user?._id]);
+
   useEffect(() => {
     if (!user?._id) return;
-    bookingAPI
-      .getUserBookings(user._id)
-      .then((res: any) => {
-        const done = (res.data?.bookings || []).filter((b: any) =>
-          ["confirmed", "paid", "completed"].includes(b.status),
-        ).length;
-        setBookingCount(done);
-      })
-      .catch(() => {});
+    void fetchProfileStats();
+  }, [fetchProfileStats, user?._id]);
 
-    userAPI
-      .getFavoriteRestaurants()
-      .then((res: any) => {
-        const favorites = Array.isArray(res.data?.favorites)
-          ? res.data.favorites
-          : [];
-        setFavoriteRestaurants(favorites);
-      })
-      .catch(() => {
-        setFavoriteRestaurants([]);
-      });
-
-    userAPI
-      .getRewards()
-      .then((res: any) => {
-        const data = res.data || {};
-        setRewardPoints(Number(data.points ?? 0));
-        setRewardTier(
-          String(data.currentTier?.label || data.currentTier?.id || "Silver"),
-        );
-        setRewardNextTier(String(data.nextTier?.label || "MAX"));
-        setRewardNeeded(Number(data.neededToNextTier ?? 0));
-        setRewardProgress(
-          Math.max(0, Math.min(100, Number(data.progress ?? 0))),
-        );
-      })
-      .catch(() => {});
-  }, [user?._id]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!user?._id) return;
+      void fetchProfileStats();
+    }, [fetchProfileStats, user?._id]),
+  );
 
   const handleSaveProfile = async () => {
     if (!editForm.fullName.trim()) {
