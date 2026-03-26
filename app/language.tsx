@@ -1,16 +1,17 @@
+import { Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
+import { useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  Animated,
-  Easing,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  StatusBar,
+    Animated,
+    Easing,
+    ScrollView,
+    StatusBar,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
-import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
 import AmbleLogo from "../components/AmbleLogo";
 import { AppLanguage, useLanguageStore } from "../store/languageStore";
 
@@ -283,7 +284,10 @@ export default function LanguageScreen() {
         />
       </Animated.View>
 
-      <View style={styles.contentWrap}>
+      <ScrollView
+        contentContainerStyle={styles.contentWrap}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.headerWrap}>
           <AmbleLogo size="xl" showText={false} textColor="#FFFFFF" />
           <Text style={styles.brandText}>Amble</Text>
@@ -332,7 +336,7 @@ export default function LanguageScreen() {
         >
           <Text style={styles.continueText}>{copy.continue}</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     </View>
   );
 }
@@ -372,7 +376,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   contentWrap: {
-    flex: 1,
+    flexGrow: 1,
     paddingTop: 80,
     paddingHorizontal: 22,
     paddingBottom: 32,
