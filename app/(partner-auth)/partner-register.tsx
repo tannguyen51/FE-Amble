@@ -382,7 +382,7 @@ const FALLBACK_PACKAGES: PackageItem[] = [
   {
     key: "pro",
     label: "Pro",
-    price: "2.999.000đ",
+    price: "3.999.000đ",
     badge: "Phổ biến",
     tone: "#EFF6FF",
     border: "#93C5FD",
@@ -420,6 +420,18 @@ const FALLBACK_PACKAGES: PackageItem[] = [
     ],
   },
 ];
+
+const PACKAGE_PRICE_OVERRIDES: Record<PackageItem["key"], string> = {
+  basic: "Free",
+  pro: "3.999.000đ",
+  premium: "9.999.000đ",
+};
+
+const applyPackagePriceOverrides = (items: PackageItem[]) =>
+  items.map((item) => ({
+    ...item,
+    price: PACKAGE_PRICE_OVERRIDES[item.key] ?? item.price,
+  }));
 
 const PAYMENT_METHODS_VI = [
   {
@@ -551,7 +563,9 @@ export default function PartnerRegisterScreen() {
     () => (copyLanguage === "vi" ? BENEFITS_VI : BENEFITS_EN),
     [copyLanguage],
   );
-  const [packages, setPackages] = useState<PackageItem[]>(FALLBACK_PACKAGES);
+  const [packages, setPackages] = useState<PackageItem[]>(
+    applyPackagePriceOverrides(FALLBACK_PACKAGES),
+  );
   const [isLoadingPackages, setIsLoadingPackages] = useState(true);
   const paymentMethods = useMemo(
     () => (copyLanguage === "vi" ? PAYMENT_METHODS_VI : PAYMENT_METHODS_EN),
@@ -592,11 +606,11 @@ export default function PartnerRegisterScreen() {
         const packageData = res.data?.packages || [];
 
         if (mounted && packageData.length > 0) {
-          setPackages(packageData);
+          setPackages(applyPackagePriceOverrides(packageData));
         }
       } catch (error) {
         if (mounted) {
-          setPackages(FALLBACK_PACKAGES);
+          setPackages(applyPackagePriceOverrides(FALLBACK_PACKAGES));
         }
       } finally {
         if (mounted) {
